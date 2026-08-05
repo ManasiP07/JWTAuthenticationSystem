@@ -1,0 +1,6 @@
+@JWTAuthenticationSystem.API_HostAddress = http://localhost:5114
+
+GET {{JWTAuthenticationSystem.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
