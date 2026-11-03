@@ -10,5 +10,6 @@ namespace JWTAuthenticationSystem.API.Interfaces.IServices
         Task<GlobalApiResponseModel> Register(RegisterRequestDTO model);
         Task<GlobalApiResponseModel> Login(LoginRequestDTO model);
         Task<GlobalApiResponseModel> RefreshToken(RefreshTokenRequestDTO model);
+        Task<GlobalApiResponseModel> Logout(LogoutRequestDTO model, Guid userId);
     }
 }
