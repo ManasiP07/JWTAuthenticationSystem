@@ -354,5 +354,59 @@ namespace JWTAuthenticationSystem.API.Services
                 Message = message
             };
         }
+
+
+        public async Task<GlobalApiResponseModel> Logout(LogoutRequestDTO model, Guid userId)
+        {
+            // 1. Validate request
+            if (model == null ||
+                string.IsNullOrWhiteSpace(model.RefreshToken))
+            {
+                return new GlobalApiResponseModel
+                {
+                    Data = null,
+                    IsStatusCodeSuccessful = false,
+                    StatusCode = 400,
+                    Message = "Refresh token is required."
+                };
+            }
+
+            // 2. Hash the refresh token
+            var tokenHash =
+                _refreshTokenService.HashRefreshToken(model.RefreshToken);
+
+            // 3. Find the refresh token
+            var existingToken =
+                await _refreshTokenRepository.GetByTokenHash(tokenHash);
+
+            if (existingToken == null ||
+                existingToken.IsRevoked ||
+                existingToken.UserId != userId)
+            {
+                return new GlobalApiResponseModel
+                {
+                    Data = null,
+                    IsStatusCodeSuccessful = false,
+                    StatusCode = 401,
+                    Message = "Invalid refresh token."
+                };
+            }
+
+            // 4. Revoke the refresh token
+            existingToken.IsRevoked = true;
+            existingToken.RevokedDate = DateTime.UtcNow;
+
+            await _refreshTokenRepository.UpdateRefreshToken(existingToken);
+
+            // 5. Return logout response
+            return new GlobalApiResponseModel
+            {
+                Data = null,
+                IsStatusCodeSuccessful = true,
+                StatusCode = 200,
+                Message = "Logout successful."
+            };
+        }
+
     }
 }

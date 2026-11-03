@@ -4,6 +4,7 @@ using JWTAuthenticationSystem.API.DTOs.RequestModels;
 using JWTAuthenticationSystem.API.Interfaces.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace JWTAuthenticationSystem.API.Controllers
 {
@@ -61,5 +62,29 @@ namespace JWTAuthenticationSystem.API.Controllers
 
             return StatusCode(response.StatusCode, response);
         }
+
+
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<IActionResult> Logout([FromBody] LogoutRequestDTO model)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!Guid.TryParse(userIdValue, out Guid userId))
+            {
+                return Unauthorized(new GlobalApiResponseModel
+                {
+                    Data = null,
+                    IsStatusCodeSuccessful = false,
+                    StatusCode = 401,
+                    Message = "Invalid user identity."
+                });
+            }
+
+            var response = await _authService.Logout(model, userId);
+
+            return StatusCode(response.StatusCode, response);
+        }
+
     }
 }
